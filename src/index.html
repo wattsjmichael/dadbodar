@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101316">
+  <title>Dadbod AR</title>
+</head>
+<body>
+  <main id="welcome" class="panel">
+    <div class="card">
+      <p class="eyebrow">LABEL / MEET REALITY</p>
+      <h1>Dadbod <span>AR</span></h1>
+      <p id="message" role="status" aria-live="polite">Point your camera at the can.</p>
+      <button id="start" type="button">START AR</button>
+      <p id="help" class="help">Allow camera access when asked.</p>
+      <p class="credit">8th Wall XR Engine by Niantic Spatial · <a href="./external/xr/LICENSE">License &amp; warranty disclaimer</a></p>
+    </div>
+  </main>
+  <div id="hud" hidden>
+    <p class="brand">Dadbod <span>AR</span></p>
+    <p id="tracking-status" role="status" aria-live="polite">LOOK FOR THE LABEL</p>
+    <button id="stop" type="button" aria-label="Stop AR and release camera">STOP AR</button>
+  </div>
+  <script src="bundle.js"></script>
+</body>
+</html>

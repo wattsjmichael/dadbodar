@@ -1,0 +1,31 @@
+{
+  "imagePath": "image-targets/elysian_1_luminance.png",
+  "metadata": null,
+  "name": "elysian_1",
+  "type": "CYLINDER",
+  "properties": {
+    "left": 98,
+    "top": 0,
+    "width": 720,
+    "height": 960,
+    "isRotated": true,
+    "originalWidth": 915,
+    "originalHeight": 960,
+    "targetCircumferenceTop": 88,
+    "cylinderCircumferenceTop": 191,
+    "cylinderCircumferenceBottom": 191,
+    "cylinderSideLength": 83.875,
+    "arcAngle": 165.86387434554973,
+    "coniness": 0,
+    "inputMode": "ADVANCED",
+    "unit": "mm"
+  },
+  "resources": {
+    "originalImage": "elysian_1_original.png",
+    "croppedImage": "elysian_1_cropped.png",
+    "thumbnailImage": "elysian_1_thumbnail.png",
+    "luminanceImage": "elysian_1_luminance.png"
+  },
+  "created": 1789232082471,
+  "updated": 1789232082471
+}

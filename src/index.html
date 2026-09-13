@@ -9,7 +9,7 @@
 <body>
   <main id="welcome" class="panel">
     <div class="card">
-      <p class="eyebrow">LABEL / MEET REALITY</p>
+      <p class="eyebrow">PUMPKIN INVASION / DADBOD AR</p>
       <h1>Dadbod <span>AR</span></h1>
       <p id="message" role="status" aria-live="polite">Point your camera at the can.</p>
       <button id="start" type="button">START AR</button>
@@ -19,7 +19,14 @@
   </main>
   <div id="hud" hidden>
     <p class="brand">Dadbod <span>AR</span></p>
+    <div class="game-stats"><div>SCORE <b id="score">0</b></div><div>LIVES <b id="lives">3</b></div><div>WAVE <b id="wave">1</b></div></div>
     <p id="tracking-status" role="status" aria-live="polite">LOOK FOR THE LABEL</p>
+    <p id="game-notice" role="status">Point at the label to play</p>
+    <section id="game-over" hidden aria-label="Game over">
+      <p class="eyebrow">PUMPKIN INVASION</p><h2>GAME OVER</h2>
+      <p>Final score <b id="final-score">0</b></p>
+      <button id="play-again">PLAY AGAIN</button>
+    </section>
     <button id="stop" type="button" aria-label="Stop AR and release camera">STOP AR</button>
   </div>
   <script src="bundle.js"></script>

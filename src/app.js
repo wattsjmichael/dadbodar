@@ -1,5 +1,5 @@
 import './styles.css'
-const {registerOwlComponent} = require('./owl.js')
+const {registerPumpkinGame} = require('./pumpkin-game.js')
 
 // This is the only target configuration used by both XR8 and the anchor.
 // Keep the generated type/properties intact: PLANAR, CYLINDER or CONICAL.
@@ -13,6 +13,7 @@ const status = document.querySelector('#tracking-status')
 let scene
 let anchor
 let owl
+let gameRoot
 let failed = false
 let running = false
 let startupTimer
@@ -22,7 +23,7 @@ function showError(text, hint = 'Reload to try again.') {
   running = false
   clearTimeout(startupTimer)
   if (anchor) anchor.object3D.visible = false
-  if (owl) owl.setAttribute('dadbod-owl', 'active', false)
+  if (gameRoot) gameRoot.setAttribute('pumpkin-game', 'tracked', false)
   window.XR8?.stop()
   hud.hidden = true
   welcome.hidden = false
@@ -63,7 +64,7 @@ function tracking(found) {
   if (failed || document.hidden) return
   hud.dataset.found = String(found)
   status.textContent = found ? 'FOUND IT' : 'LOOK FOR THE LABEL'
-  if (owl) owl.setAttribute('dadbod-owl', 'active', found)
+  if (gameRoot) gameRoot.setAttribute('pumpkin-game', 'tracked', found)
 }
 
 function createScene() {
@@ -71,7 +72,7 @@ function createScene() {
   if (!AFRAME.components.xrweb || !AFRAME.components['xrextras-named-image-target']) {
     throw new Error('The official A-Frame tracking components did not load')
   }
-  registerOwlComponent(AFRAME)
+  registerPumpkinGame(AFRAME)
   XR8.XrController.configure({imageTargetData: [target]})
   scene = document.createElement('a-scene')
   scene.setAttribute('renderer', 'colorManagement: true')
@@ -82,15 +83,17 @@ function createScene() {
     <a-light type="ambient" intensity="0.9"></a-light>
     <a-light type="directional" intensity="1.2" position="1 2 3"></a-light>
     <xrextras-named-image-target visible="false">
-      <a-entity id="owl-surface" position="0 0 0.20">
-        <a-entity id="owl" dadbod-owl="size: 0.25; duration: 2.4"
+      <a-entity id="game-root" position="0 0 0.20" pumpkin-game>
+        <a-entity id="owl"
           gltf-model="url(./models/owl.glb)"></a-entity>
       </a-entity>
     </xrextras-named-image-target>`
   anchor = scene.querySelector('xrextras-named-image-target')
   anchor.setAttribute('name', target.name)
   owl = anchor.querySelector('#owl')
-  const surface = anchor.querySelector('#owl-surface')
+  gameRoot = anchor.querySelector('#game-root')
+  const surface = gameRoot
+  gameRoot.addEventListener('game-error', ({detail}) => showError('The game could not start.', detail.message))
   owl.addEventListener('model-error', () => {
     showError('The owl model could not load.', 'Check that public/models/owl.glb exists, restart the server, and reload.')
   })
@@ -186,7 +189,7 @@ document.addEventListener('visibilitychange', () => {
   if (!running || failed) return
   if (document.hidden) {
     anchor.object3D.visible = false
-    owl.setAttribute('dadbod-owl', 'active', false)
+    gameRoot.setAttribute('pumpkin-game', 'tracked', false)
     hud.dataset.found = 'false'
     status.textContent = 'LOOK FOR THE LABEL'
     window.XR8.pause()

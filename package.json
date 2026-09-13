@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "build": "webpack --config config/webpack.config.js",
+    "postbuild": "node scripts/test-bundle.cjs",
     "serve": "webpack-dev-server --mode=development --config config/webpack.config.js",
     "dev": "webpack-dev-server --mode=development --config config/webpack.config.js",
     "check": "node scripts/check-target.cjs",

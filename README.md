@@ -1,6 +1,6 @@
 # Dadbod AR — image-target proof of concept
 
-One label, one animated cube, rear camera, mobile browser. No app installation or QR code.
+One label, one animated owl, rear camera, mobile browser. No app installation or QR code.
 This is a runnable source project, not the future brand-upload platform.
 
 ## Quick start
@@ -32,8 +32,8 @@ screen glare can hurt detection. No target generation is necessary for this samp
 
 On your phone, open the trusted HTTPS network URL, tap **START AR**, allow camera
 access, and point the rear camera at the print. Move slowly until **FOUND IT** appears.
-A rotating lime cube should float just in front of the image. Move the phone sideways
-to check that the cube stays attached. Move the image out of view: the cube must hide
+A flapping owl should fly out from the image and hover. Move the phone sideways
+to check that the owl stays attached. Move the image out of view: the owl must hide
 and the status must return to **LOOK FOR THE LABEL**. Bring it back to reacquire.
 
 ## Replace the sample with your beer label
@@ -126,7 +126,7 @@ Copy the new generated files into the same directory. Keep all generated `type` 
 `properties` values intact. The application accepts PLANAR, CYLINDER and CONICAL data;
 it does not replace geometry with a flat marker. The official component owns target
 position, orientation, scale and visibility for each type. A geometry listener moves
-the cube outside the cylinder/cone surface. No tracking rewrite is needed.
+the owl outside the cylinder/cone surface. No tracking rewrite is needed.
 
 Glossy metal, glare, repeated patterns, sparse artwork, steep viewing angles, motion
 blur and a hand covering the crop can prevent tracking. Test one front-facing can
@@ -212,7 +212,7 @@ open `dist/index.html` directly as a `file://` URL for AR.
 The anchor is the official `xrextras-named-image-target` component. It copies the
 engine's target position, quaternion and scale on `xrimagefound` / `xrimageupdated`,
 and hides itself on `xrimagelost`. App listeners update LOOK FOR THE LABEL / FOUND IT
-and pause/resume cube animation. The +Z offset places the object in front of the
+and start/reset the owl animation. The +Z offset places the object in front of the
 planar label. For curved targets it includes the target's middle radius.
 
 Switching away from the tab pauses XR8 and hides stale content. Returning resumes

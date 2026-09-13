@@ -1,4 +1,5 @@
 import './styles.css'
+const {registerOwlComponent} = require('./owl.js')
 
 // This is the only target configuration used by both XR8 and the anchor.
 // Keep the generated type/properties intact: PLANAR, CYLINDER or CONICAL.
@@ -11,7 +12,7 @@ const hud = document.querySelector('#hud')
 const status = document.querySelector('#tracking-status')
 let scene
 let anchor
-let cube
+let owl
 let failed = false
 let running = false
 let startupTimer
@@ -21,6 +22,7 @@ function showError(text, hint = 'Reload to try again.') {
   running = false
   clearTimeout(startupTimer)
   if (anchor) anchor.object3D.visible = false
+  if (owl) owl.setAttribute('dadbod-owl', 'active', false)
   window.XR8?.stop()
   hud.hidden = true
   welcome.hidden = false
@@ -61,7 +63,7 @@ function tracking(found) {
   if (failed || document.hidden) return
   hud.dataset.found = String(found)
   status.textContent = found ? 'FOUND IT' : 'LOOK FOR THE LABEL'
-  if (cube) found ? cube.play() : cube.pause()
+  if (owl) owl.setAttribute('dadbod-owl', 'active', found)
 }
 
 function createScene() {
@@ -69,6 +71,7 @@ function createScene() {
   if (!AFRAME.components.xrweb || !AFRAME.components['xrextras-named-image-target']) {
     throw new Error('The official A-Frame tracking components did not load')
   }
+  registerOwlComponent(AFRAME)
   XR8.XrController.configure({imageTargetData: [target]})
   scene = document.createElement('a-scene')
   scene.setAttribute('renderer', 'colorManagement: true')
@@ -79,21 +82,24 @@ function createScene() {
     <a-light type="ambient" intensity="0.9"></a-light>
     <a-light type="directional" intensity="1.2" position="1 2 3"></a-light>
     <xrextras-named-image-target visible="false">
-      <a-box position="0 0 0.22" width="0.28" height="0.28" depth="0.28"
-        material="color: #dcff55; emissive: #8bbd13; emissiveIntensity: 0.45; metalness: 0.15; roughness: 0.3"
-        animation="property: rotation; from: 20 0 15; to: 20 360 15; dur: 3000; easing: linear; loop: true">
-        <a-box width="1.05" height="1.05" depth="1.05" scale="0.28 0.28 0.28"
-          material="shader: flat; color: #101316; wireframe: true"></a-box>
-      </a-box>
+      <a-entity id="owl-surface" position="0 0 0.20">
+        <a-entity id="owl" dadbod-owl="size: 0.25; duration: 2.4"
+          gltf-model="url(./models/owl.glb)"></a-entity>
+      </a-entity>
     </xrextras-named-image-target>`
   anchor = scene.querySelector('xrextras-named-image-target')
   anchor.setAttribute('name', target.name)
-  cube = anchor.querySelector('a-box')
+  owl = anchor.querySelector('#owl')
+  const surface = anchor.querySelector('#owl-surface')
+  owl.addEventListener('model-error', () => {
+    showError('The owl model could not load.', 'Check that public/models/owl.glb exists, restart the server, and reload.')
+  })
+  owl.addEventListener('owl-error', ({detail}) => showError('The owl animation could not load.', detail.message))
   // Curved target poses are centered on the cylinder axis. Move the content
   // outside its front surface using geometry emitted by the official component.
   anchor.addEventListener('xrextrasimagegeometry', ({detail}) => {
     const radius = detail.type === 'PLANAR' ? 0 : ((detail.radiusTop || 0) + (detail.radiusBottom || 0)) / 2
-    cube.setAttribute('position', {x: 0, y: 0, z: radius + 0.22})
+    surface.setAttribute('position', {x: 0, y: 0, z: radius + 0.20})
   })
   // The OFFICIAL component owns position, quaternion, scale and visibility.
   // Our handlers only control UI and animation; no custom tracking algorithm.
@@ -180,7 +186,7 @@ document.addEventListener('visibilitychange', () => {
   if (!running || failed) return
   if (document.hidden) {
     anchor.object3D.visible = false
-    cube.pause()
+    owl.setAttribute('dadbod-owl', 'active', false)
     hud.dataset.found = 'false'
     status.textContent = 'LOOK FOR THE LABEL'
     window.XR8.pause()

@@ -43,14 +43,14 @@ Complete these acceptance checks on physical devices:
 | --- | --- |
 | Modern iPhone Safari and Android Chrome, trusted HTTPS | Start screen, rear camera after START AR |
 | Deny camera permission | Readable recovery screen; permission instructions |
-| Hold sample print steadily in view | FOUND IT and rotating lime cube |
-| Translate/tilt phone around print | Cube follows target position, rotation and scale |
-| Move print out of view | Cube hides, animation pauses, LOOK FOR THE LABEL returns |
+| Hold sample print steadily in view | FOUND IT and a flapping owl flies out |
+| Translate/tilt phone around print | Owl follows target position, rotation and scale |
+| Move print out of view | Owl hides, animation resets, LOOK FOR THE LABEL returns |
 | Bring print back | Tracking and animation resume |
-| Switch tabs and return | Stale cube hidden; scanning resumes |
+| Switch tabs and return | Stale owl hidden; scanning resumes |
 | Tap STOP AR | Camera is released and start screen returns |
 | Replace target with generated beer-label data | Same interaction on the new artwork |
-| Substitute a correctly measured cylinder target | Cube remains attached outside the can surface |
+| Substitute a correctly measured cylinder target | Owl remains attached outside the can surface |
 
 First test the included flat print. Then validate a real can under diffuse light,
 including rotation, loss/reacquisition and glare. The sprint's physical success

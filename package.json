@@ -30,7 +30,7 @@
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.2.2"
   },
-  "description": "Dadbod AR: one local image target and one anchored animated cube.",
+  "description": "Dadbod AR: one local image target and one anchored animated owl.",
   "main": "index.js",
   "keywords": [],
   "author": "",

@@ -1,5 +1,6 @@
 import './styles.css'
 const {registerPumpkinGame} = require('./pumpkin-game.js')
+const {createCapture} = require('./capture.js')
 
 // This is the only target configuration used by both XR8 and the anchor.
 // Keep the generated type/properties intact: PLANAR, CYLINDER or CONICAL.
@@ -14,6 +15,7 @@ let scene
 let anchor
 let owl
 let gameRoot
+let capture
 let failed = false
 let running = false
 let startupTimer
@@ -22,6 +24,7 @@ function showError(text, hint = 'Reload to try again.') {
   failed = true
   running = false
   clearTimeout(startupTimer)
+  capture?.dispose()
   if (anchor) anchor.object3D.visible = false
   if (gameRoot) gameRoot.setAttribute('pumpkin-game', 'tracked', false)
   window.XR8?.stop()
@@ -65,6 +68,7 @@ function tracking(found) {
   hud.dataset.found = String(found)
   status.textContent = found ? 'FOUND IT' : 'LOOK FOR THE LABEL'
   if (gameRoot) gameRoot.setAttribute('pumpkin-game', 'tracked', found)
+  capture?.update()
 }
 
 function createScene() {
@@ -122,6 +126,7 @@ function createScene() {
     welcome.hidden = true
     hud.hidden = false
     tracking(false)
+    if (!capture) capture = createCapture({scene, getGame: () => gameRoot.components['pumpkin-game']?.game, isRunning: () => running && !failed})
   })
   scene.addEventListener('camerastatuschange', ({detail}) => {
     if (detail.status === 'requesting') {
@@ -182,6 +187,7 @@ start.onclick = async () => {
 }
 
 document.querySelector('#stop').onclick = () => {
+  capture?.dispose()
   window.XR8?.stop()
   window.location.reload()
 }
@@ -198,7 +204,7 @@ document.addEventListener('visibilitychange', () => {
     tracking(false)
   }
 })
-window.addEventListener('pagehide', () => window.XR8?.stop())
+window.addEventListener('pagehide', () => { capture?.dispose(); window.XR8?.stop() })
 
 // An early development hint without loading the large engine or opening a camera.
 if (!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && !(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {

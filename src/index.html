@@ -28,8 +28,21 @@
       <button id="play-again">PLAY AGAIN</button>
     </section>
     <button id="stop" type="button" aria-label="Stop AR and release camera">STOP AR</button>
+    <button id="record-video" type="button" disabled>RECORD 5 SEC</button>
+    <p id="capture-status" role="status" aria-live="polite"></p>
   </div>
+  <section id="capture-preview" role="dialog" aria-modal="true" aria-label="Video preview" hidden>
+    <div class="capture-card">
+      <h2>Your five-second battle</h2>
+      <video id="capture-video" controls playsinline muted></video>
+      <p id="capture-help"></p>
+      <div class="capture-actions">
+        <button id="share-video">SHARE VIDEO</button><button id="save-video">SAVE VIDEO</button>
+        <button id="retake-video">RETAKE</button><button id="close-capture">CLOSE</button>
+      </div>
+    </div>
+  </section>
   <script src="startup.js"></script>
-  <script src="bundle.js?v=startup-fix-1"></script>
+  <script src="bundle.js?v=video-1"></script>
 </body>
 </html>

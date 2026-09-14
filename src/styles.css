@@ -30,3 +30,17 @@ body:has(a-scene) { touch-action: none; overscroll-behavior: none; user-select: 
 #game-over .eyebrow { margin-bottom: 12px; font-size: .7rem; color: #ffb856; }
 #game-over h2 { margin: 0; font-size: 2rem; }
 #play-again { width: 100%; background: #dcff55; color: #111528; padding: 12px; }
+#record-video { pointer-events: auto; position: absolute; left: 20px; bottom: max(20px, env(safe-area-inset-bottom)); background: #ffc05b; color: #111528; padding: 12px; font-size: .75rem; }
+#record-video:disabled { opacity: .5; }
+#capture-status { position: absolute; left: 20px; right: 20px; top: 190px; text-align: center; background: #111528e8; border-radius: 8px; padding: 10px; font-size: .9rem; }
+#capture-status:empty { display: none; }
+#capture-status[data-state="countdown"] { font-size: 3rem; color: #ffc05b; }
+#capture-status[data-state="recording"] { color: #ff7373; }
+#capture-preview { position: fixed; inset: 0; z-index: 1200; background: #101316f5; padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)); overflow-y: auto; touch-action: pan-y; }
+.capture-card { max-width: 440px; margin: auto; }
+.capture-card h2 { font-size: 1.2rem; }
+#capture-video { display: block; width: 100%; height: 52vh; object-fit: contain; background: #000; }
+#capture-help { font-size: .85rem; color: #ccd3da; line-height: 1.4; }
+.capture-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.capture-actions button { background: #293043; color: white; font-size: .8rem; }
+#share-video { background: #dcff55; color: #111528; }

@@ -136,7 +136,7 @@ function registerPumpkinGame(AFRAME) {
       // Relative screen drag maps to local arena X, independent of world pose.
       // It works anywhere on the view and never teleports on initial touch.
       this.down = e => {
-        if (e.target.closest?.('button, a') || this.game.state !== 'playing' || this.pointer != null) return
+        if (e.target.closest?.('button, a, #capture-preview') || this.game.state !== 'playing' || this.pointer != null) return
         this.pointer = e.pointerId; this.lastX = e.clientX
         e.preventDefault()
       }

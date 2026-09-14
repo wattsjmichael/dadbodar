@@ -7,7 +7,7 @@
     "serve": "webpack-dev-server --mode=development --config config/webpack.config.js",
     "dev": "webpack-dev-server --mode=development --config config/webpack.config.js",
     "check": "node scripts/check-target.cjs",
-    "test": "node scripts/test-game.cjs"
+    "test": "node scripts/test-game.cjs && node scripts/test-capture.cjs"
   },
   "devDependencies": {
     "@babel/parser": "^7.23.9",

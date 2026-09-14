@@ -1,10 +1,14 @@
 import './styles.css'
 const {registerPumpkinGame} = require('./pumpkin-game.js')
 const {createCapture} = require('./capture.js')
+const {registerBrewerTour} = require('./experiences/brewer-tour/BrewerTour')
+const {getCampaigns} = require('./experiences/registry')
 
 // This is the only target configuration used by both XR8 and the anchor.
 // Keep the generated type/properties intact: PLANAR, CYLINDER or CONICAL.
-const target = require('../image-targets/dadbod-test-can.json')
+const campaigns = getCampaigns()
+const instances = []
+let active
 const welcome = document.querySelector('#welcome')
 const start = document.querySelector('#start')
 const message = document.querySelector('#message')
@@ -26,7 +30,7 @@ function showError(text, hint = 'Reload to try again.') {
   clearTimeout(startupTimer)
   capture?.dispose()
   if (anchor) anchor.object3D.visible = false
-  if (gameRoot) gameRoot.setAttribute('pumpkin-game', 'tracked', false)
+  instances.forEach(i => i.root.setAttribute(i.component, 'tracked', false))
   window.XR8?.stop()
   hud.hidden = true
   welcome.hidden = false
@@ -63,11 +67,26 @@ async function loadEngine() {
   })
 }
 
-function tracking(found) {
+function tracking(found, instance = active) {
   if (failed || document.hidden) return
+  if (found && instance) {
+    active = instance
+    instances.forEach(i => {
+      if (i !== active) i.root.setAttribute(i.component, 'tracked', false)
+      i.root.object3D.visible = i === active
+    })
+    active.root.setAttribute(active.component, 'tracked', true)
+  } else if (instance) {
+    instance.root.setAttribute(instance.component, 'tracked', false)
+    instance.root.object3D.visible = false
+    if (instance !== active) return
+  }
   hud.dataset.found = String(found)
   status.textContent = found ? 'FOUND IT' : 'LOOK FOR THE LABEL'
-  if (gameRoot) gameRoot.setAttribute('pumpkin-game', 'tracked', found)
+  const isGame = active?.component === 'pumpkin-game'
+  document.querySelector('.game-stats').hidden = !isGame
+  document.querySelector('#game-notice').hidden = !isGame
+  if (!isGame) document.querySelector('#game-over').hidden = true
   capture?.update()
 }
 
@@ -77,7 +96,8 @@ function createScene() {
     throw new Error('The official A-Frame tracking components did not load')
   }
   registerPumpkinGame(AFRAME)
-  XR8.XrController.configure({imageTargetData: [target]})
+  registerBrewerTour(AFRAME)
+  XR8.XrController.configure({imageTargetData: campaigns.map(c => c.target)})
   scene = document.createElement('a-scene')
   scene.setAttribute('renderer', 'colorManagement: true')
   scene.setAttribute('vr-mode-ui', 'enabled: false')
@@ -85,39 +105,46 @@ function createScene() {
   scene.innerHTML = `
     <a-camera position="0 0 0" look-controls="enabled: false" wasd-controls="enabled: false"></a-camera>
     <a-light type="ambient" intensity="0.9"></a-light>
-    <a-light type="directional" intensity="1.2" position="1 2 3"></a-light>
-    <xrextras-named-image-target visible="false">
-      <a-entity id="game-root" position="0 0 0.20" pumpkin-game>
-        <a-entity id="owl"
-          gltf-model="url(./models/owl.glb)"></a-entity>
-      </a-entity>
-    </xrextras-named-image-target>`
-  anchor = scene.querySelector('xrextras-named-image-target')
-  anchor.setAttribute('name', target.name)
-  owl = anchor.querySelector('#owl')
-  gameRoot = anchor.querySelector('#game-root')
-  const surface = gameRoot
-  gameRoot.addEventListener('game-error', ({detail}) => showError('The game could not start.', detail.message))
-  owl.addEventListener('model-error', () => {
-    showError('The owl model could not load.', 'Check that public/models/owl.glb exists, restart the server, and reload.')
-  })
-  owl.addEventListener('owl-error', ({detail}) => showError('The owl animation could not load.', detail.message))
+    <a-light type="directional" intensity="1.2" position="1 2 3"></a-light>`
+  campaigns.forEach(campaign => {
+    const targetAnchor = document.createElement('xrextras-named-image-target')
+    targetAnchor.setAttribute('visible', false)
+    targetAnchor.setAttribute('name', campaign.target.name)
+    const root = document.createElement('a-entity')
+    root.setAttribute('position', '0 0 0.20')
+    root.brewerConfig = campaign.config
+    if (campaign.component === 'pumpkin-game') {
+      root.id = 'game-root'
+      root.innerHTML = '<a-entity id="owl" gltf-model="url(./models/owl.glb)"></a-entity>'
+      root.addEventListener('game-error', ({detail}) => showError('The game could not start.', detail.message))
+      root.querySelector('#owl').addEventListener('model-error', () => showError('The owl model could not load.'))
+      gameRoot = root
+    }
+    root.setAttribute(campaign.component, '')
+    targetAnchor.appendChild(root)
+    scene.appendChild(targetAnchor)
+    instances.push({...campaign, anchor: targetAnchor, root})
   // Curved target poses are centered on the cylinder axis. Move the content
   // outside its front surface using geometry emitted by the official component.
-  anchor.addEventListener('xrextrasimagegeometry', ({detail}) => {
+  targetAnchor.addEventListener('xrextrasimagegeometry', ({detail}) => {
     const radius = detail.type === 'PLANAR' ? 0 : ((detail.radiusTop || 0) + (detail.radiusBottom || 0)) / 2
-    surface.setAttribute('position', {x: 0, y: 0, z: radius + 0.20})
+    root.setAttribute('position', {x: 0, y: 0, z: radius + 0.20})
   })
+  })
+  anchor = instances[0].anchor
   // The OFFICIAL component owns position, quaternion, scale and visibility.
   // Our handlers only control UI and animation; no custom tracking algorithm.
   scene.addEventListener('xrimagefound', event => {
-    if (event.detail.name === target.name) tracking(true)
+    const instance = instances.find(i => i.target.name === event.detail.name)
+    if (instance) tracking(true, instance)
   })
   scene.addEventListener('xrimageupdated', event => {
-    if (event.detail.name === target.name && hud.dataset.found !== 'true') tracking(true)
+    const instance = instances.find(i => i.target.name === event.detail.name)
+    if (instance && (!active || instance === active || hud.dataset.found !== 'true')) tracking(true, instance)
   })
   scene.addEventListener('xrimagelost', event => {
-    if (event.detail.name === target.name) tracking(false)
+    const instance = instances.find(i => i.target.name === event.detail.name)
+    if (instance) tracking(false, instance)
   })
   scene.addEventListener('realityready', () => {
     if (failed) return
@@ -126,7 +153,7 @@ function createScene() {
     welcome.hidden = true
     hud.hidden = false
     tracking(false)
-    if (!capture) capture = createCapture({scene, getGame: () => gameRoot.components['pumpkin-game']?.game, isRunning: () => running && !failed})
+    if (!capture) capture = createCapture({scene, getGame: () => active?.root.components[active.component]?.game, isRunning: () => running && !failed})
   })
   scene.addEventListener('camerastatuschange', ({detail}) => {
     if (detail.status === 'requesting') {
@@ -164,8 +191,9 @@ start.onclick = async () => {
   message.textContent = 'Loading AR…'
   help.textContent = 'Keep this page open. Camera permission comes next.'
   try {
+    await Promise.all(campaigns.map(({target}) => {
     const image = new Image()
-    await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error('Target image loading timed out.')), 30000)
       image.onload = () => { clearTimeout(timer); resolve() }
       image.onerror = () => {
@@ -174,6 +202,7 @@ start.onclick = async () => {
       }
       image.src = target.imagePath
     })
+    }))
     await loadEngine()
     if (!window.XR8.XrDevice.isDeviceBrowserCompatible({allowedDevices: window.XR8.XrConfig.device().MOBILE})) {
       showError('Open Dadbod AR on your phone.', 'Use iPhone Safari or Android Chrome. For development, open this computer’s trusted HTTPS network address on your phone.')
@@ -194,8 +223,7 @@ document.querySelector('#stop').onclick = () => {
 document.addEventListener('visibilitychange', () => {
   if (!running || failed) return
   if (document.hidden) {
-    anchor.object3D.visible = false
-    gameRoot.setAttribute('pumpkin-game', 'tracked', false)
+    instances.forEach(i => { i.anchor.object3D.visible = false; i.root.setAttribute(i.component, 'tracked', false) })
     hud.dataset.found = 'false'
     status.textContent = 'LOOK FOR THE LABEL'
     window.XR8.pause()

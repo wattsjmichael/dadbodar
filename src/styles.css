@@ -44,3 +44,10 @@ body:has(a-scene) { touch-action: none; overscroll-behavior: none; user-select: 
 .capture-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .capture-actions button { background: #293043; color: white; font-size: .8rem; }
 #share-video { background: #dcff55; color: #111528; }
+#brewer-panel { position: absolute; bottom: max(90px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: min(90vw, 390px); padding: 14px 18px; border-radius: 18px; background: rgba(22, 32, 25, .93); color: #fff4dd; text-align: left; pointer-events: auto; }
+#brewer-panel h2 { margin: 3px 0 7px; font-size: 24px; }
+#brewer-panel p { margin: 4px 0; }
+#brewer-panel .tour-step { color: #c4db85; font-size: 12px; font-weight: bold; letter-spacing: .15em; }
+#brewer-panel .tour-copy { font-size: 14px; line-height: 1.35; }
+#brewer-panel button { width: 100%; min-height: 48px; margin-top: 10px; }
+[hidden] { display: none !important; }

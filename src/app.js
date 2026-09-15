@@ -3,10 +3,13 @@ const {registerPumpkinGame} = require('./pumpkin-game.js')
 const {createCapture} = require('./capture.js')
 const {registerBrewerTour} = require('./experiences/brewer-tour/BrewerTour')
 const {getCampaigns} = require('./experiences/registry')
+const {loadCampaigns} = require('./runtime-config')
+const {ExperienceRegistry} = require('./experiences/ExperienceRegistry')
+const experienceRegistry = new ExperienceRegistry(({detail}) => showError('Experience could not start.', detail?.message || 'Check the model and experience configuration.'))
 
 // This is the only target configuration used by both XR8 and the anchor.
 // Keep the generated type/properties intact: PLANAR, CYLINDER or CONICAL.
-const campaigns = getCampaigns()
+let campaigns = []
 const instances = []
 let active
 const welcome = document.querySelector('#welcome')
@@ -17,8 +20,6 @@ const hud = document.querySelector('#hud')
 const status = document.querySelector('#tracking-status')
 let scene
 let anchor
-let owl
-let gameRoot
 let capture
 let failed = false
 let running = false
@@ -30,7 +31,7 @@ function showError(text, hint = 'Reload to try again.') {
   clearTimeout(startupTimer)
   capture?.dispose()
   if (anchor) anchor.object3D.visible = false
-  instances.forEach(i => i.root.setAttribute(i.component, 'tracked', false))
+  experienceRegistry.pause()
   window.XR8?.stop()
   hud.hidden = true
   welcome.hidden = false
@@ -72,12 +73,12 @@ function tracking(found, instance = active) {
   if (found && instance) {
     active = instance
     instances.forEach(i => {
-      if (i !== active) i.root.setAttribute(i.component, 'tracked', false)
+      if (i !== active) experienceRegistry.pause(i)
       i.root.object3D.visible = i === active
     })
-    active.root.setAttribute(active.component, 'tracked', true)
+    experienceRegistry.launch(active)
   } else if (instance) {
-    instance.root.setAttribute(instance.component, 'tracked', false)
+    experienceRegistry.pause(instance)
     instance.root.object3D.visible = false
     if (instance !== active) return
   }
@@ -112,15 +113,6 @@ function createScene() {
     targetAnchor.setAttribute('name', campaign.target.name)
     const root = document.createElement('a-entity')
     root.setAttribute('position', '0 0 0.20')
-    root.brewerConfig = campaign.config
-    if (campaign.component === 'pumpkin-game') {
-      root.id = 'game-root'
-      root.innerHTML = '<a-entity id="owl" gltf-model="url(./models/owl.glb)"></a-entity>'
-      root.addEventListener('game-error', ({detail}) => showError('The game could not start.', detail.message))
-      root.querySelector('#owl').addEventListener('model-error', () => showError('The owl model could not load.'))
-      gameRoot = root
-    }
-    root.setAttribute(campaign.component, '')
     targetAnchor.appendChild(root)
     scene.appendChild(targetAnchor)
     instances.push({...campaign, anchor: targetAnchor, root})
@@ -191,6 +183,7 @@ start.onclick = async () => {
   message.textContent = 'Loading AR…'
   help.textContent = 'Keep this page open. Camera permission comes next.'
   try {
+    campaigns = await loadCampaigns(getCampaigns)
     await Promise.all(campaigns.map(({target}) => {
     const image = new Image()
     return new Promise((resolve, reject) => {
@@ -217,13 +210,14 @@ start.onclick = async () => {
 
 document.querySelector('#stop').onclick = () => {
   capture?.dispose()
+  experienceRegistry.dispose()
   window.XR8?.stop()
   window.location.reload()
 }
 document.addEventListener('visibilitychange', () => {
   if (!running || failed) return
   if (document.hidden) {
-    instances.forEach(i => { i.anchor.object3D.visible = false; i.root.setAttribute(i.component, 'tracked', false) })
+    instances.forEach(i => { i.anchor.object3D.visible = false; experienceRegistry.pause(i) })
     hud.dataset.found = 'false'
     status.textContent = 'LOOK FOR THE LABEL'
     window.XR8.pause()

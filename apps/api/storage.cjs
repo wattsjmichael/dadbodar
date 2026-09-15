@@ -29,6 +29,12 @@ function createStorage(root) {
    if (jsonFiles.length!==1) throw new Error('Select one target JSON and all its generated images')
    const target = JSON.parse(jsonFiles[0].buffer.toString('utf8'))
    if (!/^[a-zA-Z0-9_-]{1,120}$/.test(target.name) || !typeMap[target.type] || !target.properties || typeof target.properties!=='object') throw new Error('Invalid 8th Wall target name, type or geometry')
+   for (const key of ['width','height','originalWidth','originalHeight']) {
+    if (!Number.isFinite(target.properties[key]) || target.properties[key] <= 0) throw new Error('Invalid target geometry: ' + key)
+   }
+   if (target.type !== 'PLANAR') for (const key of ['cylinderCircumferenceTop','cylinderCircumferenceBottom','cylinderSideLength']) {
+    if (!Number.isFinite(target.properties[key]) || target.properties[key] <= 0) throw new Error('Invalid curved target geometry: ' + key)
+   }
    const byName = new Map()
    for (const f of files) {
     if (!/^[a-zA-Z0-9_.-]+$/.test(f.name) || f.name==='.' || f.name==='..' || byName.has(f.name)) throw new Error('Invalid or duplicate upload filename')

@@ -125,6 +125,7 @@ const config = {
   context: srcPath,
   devServer: {
     devMiddleware: {publicPath: '/'},
+    proxy: [{context: ['/api/runtime', '/api/labels', '/api/experiences', '/uploads'], target: 'http://127.0.0.1:' + (process.env.DADBOD_API_PORT || '3001')}],
     open: false,
     host: process.env.AR_HOST || defaultHost,
     port: 8080,

@@ -7,7 +7,10 @@
     "serve": "webpack-dev-server --mode=development --config config/webpack.config.js",
     "dev": "webpack-dev-server --mode=development --config config/webpack.config.js",
     "check": "node scripts/check-target.cjs",
-    "test": "node scripts/test-game.cjs && node scripts/test-capture.cjs && node scripts/test-brewer.cjs"
+    "test": "node scripts/test-game.cjs && node scripts/test-capture.cjs && node scripts/test-brewer.cjs && npm run test:admin",
+    "admin": "node apps/api/server.cjs",
+    "dev:all": "node scripts/dev-all.cjs",
+    "test:admin": "node --test scripts/test-admin.cjs scripts/test-runtime-config.cjs"
   },
   "devDependencies": {
     "@babel/parser": "^7.23.9",
@@ -38,5 +41,8 @@
   "author": "",
   "license": "ISC",
   "type": "commonjs",
-  "private": true
+  "private": true,
+  "engines": {
+    "node": ">=22.13.0"
+  }
 }

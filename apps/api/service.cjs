@@ -24,6 +24,8 @@ function createService(repo,storage) {
    if (!/^[a-zA-Z0-9_-]{1,120}$/.test(d.targetName)) fail('Target key must use letters, numbers, underscores or hyphens')
    if (!['flat','cylindrical','conical'].includes(d.targetType)) fail('Invalid target type')
    for (const k of ['sourceImage','targetFile']) { text(k); if (d[k] && !storage.exists(d[k])) fail(`Missing ${k}`) }
+   if (d.sourceImage && !/^\/uploads\/labels\/[^/]+\.(png|jpg|webp)$/.test(d.sourceImage)) fail('Invalid artwork location')
+   if (d.targetFile && !/^\/uploads\/targets\/[^/]+\/target\.json$/.test(d.targetFile)) fail('Invalid target file location')
    if (d.targetFile) {
     const t=storage.readTarget(d.targetFile)
     if (t.name!==d.targetName || ({PLANAR:'flat',CYLINDER:'cylindrical',CONICAL:'conical'})[t.type]!==d.targetType) fail('Target key/type must match the uploaded target JSON')
@@ -36,7 +38,7 @@ function createService(repo,storage) {
    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(d.slug)) fail('Slug must use lowercase words separated by hyphens')
    if (!['GAME','BREWER_TOUR','STORY','CUSTOM'].includes(d.experienceType)) fail('Invalid experience type')
    if (!implementations.includes(d.implementationKey)) fail('Unknown implementation key')
-   if (d.thumbnail && !storage.exists(d.thumbnail)) fail('Missing thumbnail')
+   if (d.thumbnail && (!/^\/uploads\/thumbnails\/[^/]+\.(png|jpg|webp)$/.test(d.thumbnail) || !storage.exists(d.thumbnail))) fail('Missing thumbnail')
    d.config=config(d.config)
   } else {
    get('labels',d.labelId); get('experiences',d.experienceId)

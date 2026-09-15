@@ -243,3 +243,11 @@ entirely MIT-licensed runtime. This proof of concept follows that example. Prese
 `LICENSE`, `config/LICENSE` and the individual `external/**/LICENSE` files. Review the
 binary's platform/service restrictions before turning this prototype into a paid AR
 platform; this sprint does not establish commercial platform licensing clearance.
+
+## Internal label and experience administration
+
+See [ADMIN.md](ADMIN.md) for the separate local admin/API, uploads, SQLite storage,
+and data-driven label assignments. With Node 24, run `npm install` then
+`npm run dev:all`, open `http://localhost:3001/admin/`, and use
+`https://localhost:8080/?config=api` for the API-backed scanner. The original
+static scanner and Brewer Tour demo remain available without a backend.

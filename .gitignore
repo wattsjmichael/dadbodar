@@ -2,3 +2,6 @@ node_modules/
 dist/
 certs/
 .sites-runtime/
+# Local admin persistence (back up separately; never publish with scanner)
+data/
+uploads/
